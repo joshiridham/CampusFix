@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFix – Smart College Complaint Management System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <i class="bi bi-shield-check text-primary fs-3"></i>
+        <span class="brand-gradient">CampusFix</span>
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" id="navRoleLink">My Dashboard</a></li>
+        </ul>
+        <ul class="navbar-nav align-items-lg-center" id="navUserContainer">
+          <!-- Auth buttons populated by js/auth.js -->
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <main class="main-wrapper">
+    <section class="py-5 bg-dark text-white position-relative overflow-hidden" style="background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 100%);">
+      <div class="container py-5 text-center position-relative z-1">
+        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50 px-3 py-2 rounded-pill mb-3">
+          <i class="bi bi-lightning-charge-fill me-1"></i>Next-Gen Campus Issue Resolver
+        </span>
+        <h1 class="display-4 fw-extrabold mb-3 text-white">Smart College Complaint Management System</h1>
+        <p class="lead text-slate-300 max-w-2xl mx-auto mb-4 style-hero-sub">
+          Effortless reporting for electrical, Wi-Fi, plumbing, and facility faults. Powered by real-time tracking, Geolocation capturing, and drag-and-drop evidence upload.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a href="login.html" class="btn btn-primary-custom btn-lg px-4 py-3">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login to Portal
+          </a>
+          <a href="register.html" class="btn btn-outline-light btn-lg px-4 py-3 border-2">
+            <i class="bi bi-person-plus me-2"></i>Register New Account
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Role Quick Access Cards -->
+    <section class="py-5">
+      <div class="container">
+        <div class="text-center mb-5">
+          <h2 class="h3 fw-bold text-slate-900">Role-Based Access Control</h2>
+          <p class="text-muted">Tailored workflows designed specifically for Students, Administrators, and Technical Staff.</p>
+        </div>
+
+        <div class="row g-4">
+          <!-- Student Card -->
+          <div class="col-md-4">
+            <div class="glass-card p-4 h-100 text-center">
+              <div class="stat-icon-box bg-indigo-100 text-indigo-600 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:64px; height:64px;">
+                <i class="bi bi-mortarboard-fill fs-2"></i>
+              </div>
+              <h4 class="fw-bold mb-2">Student Portal</h4>
+              <p class="text-muted small mb-4">Submit complaints with auto GPS location & drag-drop photo evidence. Track real-time progress & view staff resolution proof.</p>
+              <a href="student-dashboard.html" class="btn btn-outline-primary btn-sm w-100">Access Student Hub &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Staff Card -->
+          <div class="col-md-4">
+            <div class="glass-card p-4 h-100 text-center">
+              <div class="stat-icon-box bg-cyan-100 text-cyan-600 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:64px; height:64px;">
+                <i class="bi bi-tools fs-2"></i>
+              </div>
+              <h4 class="fw-bold mb-2">Technical Staff</h4>
+              <p class="text-muted small mb-4">View complaints assigned to your department (Electrical, IT, Plumbing, etc.). Update progress remarks & upload completion proof.</p>
+              <a href="staff-dashboard.html" class="btn btn-outline-info btn-sm w-100 text-cyan-700">Access Staff Portal &rarr;</a>
+            </div>
+          </div>
+
+          <!-- Admin Card -->
+          <div class="col-md-4">
+            <div class="glass-card p-4 h-100 text-center">
+              <div class="stat-icon-box bg-purple-100 text-purple-600 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:64px; height:64px;">
+                <i class="bi bi-shield-lock-fill fs-2"></i>
+              </div>
+              <h4 class="fw-bold mb-2">Administration</h4>
+              <p class="text-muted small mb-4">Comprehensive analytics dashboard. Verify issues, assign technicians, prioritize urgent complaints, and monitor campus health.</p>
+              <a href="admin-dashboard.html" class="btn btn-outline-purple btn-sm w-100 text-purple-700">Access Admin Suite &rarr;</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo Accounts Callout -->
+        <div class="mt-5 p-4 rounded-4 bg-slate-900 text-white shadow-lg border border-slate-800">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <h5 class="fw-bold text-warning mb-2"><i class="bi bi-key-fill me-2"></i>Quick Viva Demo Credentials</h5>
+              <div class="row g-2 small font-monospace">
+                <div class="col-md-4">
+                  <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                    <span class="text-info fw-bold">Student:</span><br>
+                    student@campusfix.edu<br>
+                    <span class="text-muted">pass:</span> student123
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                    <span class="text-success fw-bold">Admin:</span><br>
+                    admin@campusfix.edu<br>
+                    <span class="text-muted">pass:</span> admin123
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="p-2 bg-slate-800 rounded border border-slate-700">
+                    <span class="text-warning fw-bold">Electrical Staff:</span><br>
+                    staff.elec@campusfix.edu<br>
+                    <span class="text-muted">pass:</span> staff123
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+              <a href="login.html" class="btn btn-warning fw-bold px-4 py-2">Quick Login &rarr;</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-4 text-center">
+    <div class="container">
+      <p class="mb-0 small text-slate-400">&copy; 2026 CampusFix – Smart College Complaint Management System. Built for College Practical & Viva.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

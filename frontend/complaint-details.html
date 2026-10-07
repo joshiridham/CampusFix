@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complaint Details – CampusFix</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <i class="bi bi-shield-check text-primary fs-3"></i>
+        <span class="brand-gradient">CampusFix</span>
+      </a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+          <li class="nav-item"><a class="nav-link" href="#" id="navRoleLink">Dashboard</a></li>
+        </ul>
+        <ul class="navbar-nav align-items-lg-center" id="navUserContainer"></ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-wrapper py-4">
+    <div class="container" id="complaintDetailView">
+      <div class="text-center py-5 text-muted">
+        <span class="spinner-border spinner-border-sm me-2"></span>Loading complaint details...
+      </div>
+    </div>
+  </main>
+
+  <!-- Admin Verification Modal -->
+  <div class="modal fade" id="adminManageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-gear-fill me-2 text-primary"></i>Verify & Assign Complaint</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="adminManageForm">
+          <div class="modal-body">
+            <div id="adminModalAlert" class="alert d-none"></div>
+
+            <div class="mb-3 p-3 bg-light rounded border">
+              <div class="small text-muted font-monospace" id="modalComplaintIdDisplay"></div>
+              <div class="fw-bold" id="modalComplaintTitle"></div>
+              <div class="small text-muted" id="modalComplaintLocation"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="modalStatusSelect" class="form-label fw-semibold small">Update Status</label>
+              <select class="form-select" id="modalStatusSelect" required>
+                <option value="Pending">Pending</option>
+                <option value="Verified">Verified</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="modalPrioritySelect" class="form-label fw-semibold small">Set Priority Level</label>
+              <select class="form-select" id="modalPrioritySelect" required>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="modalDepartmentSelect" class="form-label fw-semibold small">Assign Department</label>
+              <select class="form-select" id="modalDepartmentSelect">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="modalStaffSelect" class="form-label fw-semibold small">Assign Staff Technician</label>
+              <select class="form-select" id="modalStaffSelect">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="modalAdminRemarks" class="form-label fw-semibold small">Admin Instructions / Remarks</label>
+              <textarea class="form-control" id="modalAdminRemarks" rows="2" placeholder="e.g. Verified issue on-site. Replace broken part."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom" id="btnSaveAdminManage">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff Resolution Progress Modal -->
+  <div class="modal fade" id="staffUpdateModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-tools me-2"></i>Update Task Status & Proof</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="staffUpdateForm" enctype="multipart/form-data">
+          <div class="modal-body">
+            <div id="staffModalAlert" class="alert d-none"></div>
+
+            <div class="mb-3 p-3 bg-light rounded border">
+              <div class="small text-muted font-monospace" id="staffModalId"></div>
+              <div class="fw-bold" id="staffModalTitle"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="staffStatusSelect" class="form-label fw-semibold small">Update Status</label>
+              <select class="form-select" id="staffStatusSelect" name="status" required>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="staffRemarksInput" class="form-label fw-semibold small">Technician Progress Remarks</label>
+              <textarea class="form-control" id="staffRemarksInput" name="staffRemarks" rows="3" placeholder="e.g. Cable re-spliced, tested signal speed 100Mbps. Issue fixed." required></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="resolutionProofInput" class="form-label fw-semibold small">Upload Resolution Proof Photo</label>
+              <input type="file" class="form-control" id="resolutionProofInput" name="resolutionProof" accept="image/*">
+              <div class="form-text">Attach photo of completed repair or replaced equipment.</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success" id="btnSaveStaffUpdate">Save Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer class="py-4 text-center">
+    <div class="container">
+      <p class="mb-0 small text-slate-400">&copy; 2026 CampusFix – Smart College Complaint Management System.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/staff.js"></script>
+  <script src="js/student.js"></script>
+</body>
+</html>
