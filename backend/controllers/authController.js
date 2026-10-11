@@ -9,40 +9,40 @@ const generateToken = (id) => {
   return jwt.sign({ id }, JWT_SECRET, { expiresIn: '7d' });
 };
 
-// @desc    Register a new user
+// @desc    Register a new student user (Public registration)
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, departmentName, phone } = req.body;
+    const { name, email, password, role, phone } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
+      return res.status(400).json({ success: false, message: 'Please provide name, email, and password.' });
+    }
+
+    // STRICT SECURITY RULE: Reject public registration for non-student roles
+    if (role && (role.toLowerCase() === 'admin' || role.toLowerCase() === 'staff')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Security Policy: Public registration is strictly allowed for Student accounts only. Admin and Staff accounts cannot be registered publicly.'
+      });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'An account with this email already exists' });
+      return res.status(400).json({ success: false, message: 'An account with this email address already exists.' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    let departmentObjId = null;
-    if (departmentName) {
-      const dept = await Department.findOne({ name: departmentName });
-      if (dept) {
-        departmentObjId = dept._id;
-      }
-    }
-
+    // Explicitly set role to 'student' regardless of frontend body
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role || 'student',
-      department: departmentObjId,
-      phone: phone || ''
+      role: 'student',
+      phone: phone ? phone.trim() : ''
     });
 
     const token = generateToken(user._id);
@@ -55,7 +55,6 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        department: user.department,
         phone: user.phone
       }
     });
@@ -73,10 +72,10 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please enter both email and password' });
+      return res.status(400).json({ success: false, message: 'Please enter both email address and password.' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).populate('department', 'name description');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).populate('department', 'name description');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials. User not found.' });
     }
@@ -114,7 +113,7 @@ const getMe = async (req, res) => {
     const user = await User.findById(req.user.id).select('-password').populate('department', 'name description');
     return res.json({ success: true, user });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Failed to retrieve profile' });
+    return res.status(500).json({ success: false, message: 'Failed to retrieve user profile' });
   }
 };
 

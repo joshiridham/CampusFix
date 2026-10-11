@@ -91,7 +91,7 @@ async function loadStudentComplaints() {
         <td class="small text-muted">${new Date(c.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</td>
         <td>
           <a href="complaint-details.html?id=${c._id}" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-eye me-1"></i>View
+            <i class="bi bi-eye me-1"></i>View Details
           </a>
         </td>
       </tr>
@@ -352,14 +352,14 @@ async function initComplaintDetailsPage() {
               <hr class="my-3">
               <div class="d-grid gap-2">
                 ${user.role === 'admin' ? `
-                  <button class="btn btn-primary-custom" onclick="openAdminModal('${c._id}')">
-                    <i class="bi bi-gear-fill me-1"></i>Verify / Assign Complaint
-                  </button>
+                  <a href="admin-dashboard.html" class="btn btn-primary-custom">
+                    <i class="bi bi-gear-fill me-1"></i>Manage in Admin Control Center
+                  </a>
                 ` : ''}
                 ${user.role === 'staff' ? `
-                  <button class="btn btn-success" onclick="openStaffModal('${c._id}')">
-                    <i class="bi bi-check2-square me-1"></i>Update Progress / Resolve
-                  </button>
+                  <a href="staff-dashboard.html" class="btn btn-success">
+                    <i class="bi bi-check2-square me-1"></i>Manage in Staff Portal
+                  </a>
                 ` : ''}
               </div>
             ` : ''}
@@ -371,39 +371,4 @@ async function initComplaintDetailsPage() {
   } catch (err) {
     detailContainer.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>${err.message}</div>`;
   }
-}
-
-// Utility badge generators
-function getStatusBadge(status) {
-  switch (status) {
-    case 'Pending': return '<span class="badge badge-status badge-pending"><i class="bi bi-clock me-1"></i>Pending</span>';
-    case 'Verified': return '<span class="badge badge-status badge-verified"><i class="bi bi-patch-check me-1"></i>Verified</span>';
-    case 'Assigned': return '<span class="badge badge-status badge-assigned"><i class="bi bi-person-check me-1"></i>Assigned</span>';
-    case 'In Progress': return '<span class="badge badge-status badge-in-progress"><i class="bi bi-arrow-repeat me-1"></i>In Progress</span>';
-    case 'Resolved': return '<span class="badge badge-status badge-resolved"><i class="bi bi-check-circle me-1"></i>Resolved</span>';
-    case 'Rejected': return '<span class="badge badge-status badge-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>';
-    default: return `<span class="badge bg-secondary">${status}</span>`;
-  }
-}
-
-function getPriorityBadge(priority) {
-  switch (priority) {
-    case 'Urgent': return '<span class="badge badge-status badge-priority-urgent"><i class="bi bi-lightning-fill me-1"></i>Urgent</span>';
-    case 'High': return '<span class="badge badge-status badge-priority-high">High</span>';
-    case 'Medium': return '<span class="badge badge-status badge-priority-medium">Medium</span>';
-    case 'Low': return '<span class="badge badge-status badge-priority-low">Low</span>';
-    default: return `<span class="badge bg-light text-dark">${priority || 'Medium'}</span>`;
-  }
-}
-
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
 }

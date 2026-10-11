@@ -8,18 +8,14 @@ const User = require('../models/User');
 const Department = require('../models/Department');
 const Complaint = require('../models/Complaint');
 
-const seedDB = async () => {
-  const connUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/campusfix';
-
+const ensureSeedData = async () => {
   try {
-    await mongoose.connect(connUri, { serverSelectionTimeoutMS: 5000 });
-    console.log('[Seed] Connected to MongoDB for seeding...');
+    const userCount = await User.countDocuments();
+    if (userCount > 0) {
+      return; // Already initialized
+    }
 
-    // Clear existing
-    await User.deleteMany({});
-    await Department.deleteMany({});
-    await Complaint.deleteMany({});
-    console.log('[Seed] Cleared existing Users, Departments, and Complaints.');
+    console.log('[Seed] Database is empty. Auto-seeding default departments, admin, staff, and initial complaints...');
 
     // 1. Create Departments
     const deptList = [
@@ -79,7 +75,7 @@ const seedDB = async () => {
     ];
 
     const createdUsers = await User.insertMany(users);
-    console.log(`[Seed] Created ${createdUsers.length} seed users.`);
+    console.log(`[Seed] Created ${createdUsers.length} initial users.`);
 
     const studentUser = createdUsers.find(u => u.role === 'student');
     const adminUser = createdUsers.find(u => u.role === 'admin');
@@ -125,58 +121,33 @@ const seedDB = async () => {
           { status: 'Assigned', remarks: 'Assigned to Sarah Bytes', updatedBy: adminUser._id, timestamp: new Date(Date.now() - 86400000 * 2) },
           { status: 'In Progress', remarks: 'Replaced router power unit, testing bandwidth.', updatedBy: itStaff._id, timestamp: new Date(Date.now() - 3600000 * 4) }
         ]
-      },
-      {
-        complaintId: 'CF-2026-003',
-        title: 'Water Leakage from Basin Tap in Boys Restroom',
-        description: 'Water tap continuously drips and overflows onto floor near Sink #2.',
-        category: 'Plumbing',
-        location: 'Science Block B, Ground Floor Restroom',
-        latitude: 28.6128,
-        longitude: 77.2085,
-        status: 'Pending',
-        priority: 'Medium',
-        submittedBy: studentUser._id,
-        department: plumbDept._id,
-        statusHistory: [
-          { status: 'Pending', remarks: 'Complaint submitted by student', updatedBy: studentUser._id, timestamp: new Date() }
-        ]
-      },
-      {
-        complaintId: 'CF-2026-004',
-        title: 'Broken Desk & Chair in Computer Lab 2',
-        description: 'Seat wooden board detached from metal frame posing safety risk.',
-        category: 'Maintenance',
-        location: 'Engineering Block, 3rd Floor, Lab 2 Desk #15',
-        latitude: 28.6150,
-        longitude: 77.2105,
-        status: 'Resolved',
-        priority: 'Medium',
-        submittedBy: studentUser._id,
-        staffRemarks: 'Replaced broken seat assembly with new ergonomic desk chair.',
-        statusHistory: [
-          { status: 'Pending', remarks: 'Complaint submitted', updatedBy: studentUser._id, timestamp: new Date(Date.now() - 86400000 * 5) },
-          { status: 'Resolved', remarks: 'Repair work finished and inspected.', updatedBy: adminUser._id, timestamp: new Date(Date.now() - 86400000 * 1) }
-        ]
       }
     ];
 
     await Complaint.insertMany(sampleComplaints);
-    console.log(`[Seed] Created ${sampleComplaints.length} sample complaints.`);
-
-    console.log('\n================ SEED DATA READY ================');
-    console.log('Demo Credentials:');
-    console.log('  Student: student@campusfix.edu / student123');
-    console.log('  Admin:   admin@campusfix.edu / admin123');
-    console.log('  Staff:   staff.elec@campusfix.edu / staff123');
-    console.log('  Staff:   staff.it@campusfix.edu / staff123');
-    console.log('=================================================\n');
-
-    process.exit(0);
+    console.log(`[Seed] Created initial complaints successfully.`);
   } catch (err) {
-    console.error('[Seed Error]', err);
+    console.error('[Auto-Seed Error]', err);
+  }
+};
+
+const runStandaloneSeed = async () => {
+  const connUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/campusfix';
+  try {
+    await mongoose.connect(connUri, { serverSelectionTimeoutMS: 5000 });
+    await User.deleteMany({});
+    await Department.deleteMany({});
+    await Complaint.deleteMany({});
+    await ensureSeedData();
+    process.exit(0);
+  } catch (e) {
+    console.error(e);
     process.exit(1);
   }
 };
 
-seedDB();
+if (require.main === module) {
+  runStandaloneSeed();
+}
+
+module.exports = { ensureSeedData };
