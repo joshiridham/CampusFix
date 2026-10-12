@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Registration – CampusFix</title>
+  <title>Create Account – CampusFix</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -23,43 +23,98 @@
 
   <div class="container py-5 my-auto">
     <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
+      <div class="col-md-7 col-lg-5">
         <div class="glass-card p-4 p-sm-5 text-dark shadow-2xl rounded-4">
           <div class="text-center mb-4">
-            <div class="bg-indigo-50 text-indigo-600 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:56px; height:56px;">
-              <i class="bi bi-mortarboard fs-3"></i>
+            <div id="headerRoleIconWrapper" class="bg-indigo-50 text-indigo-600 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:58px; height:58px;">
+              <i id="headerRoleIcon" class="bi bi-person-plus fs-3"></i>
             </div>
-            <h3 class="fw-bold mb-1">Create Student Account</h3>
-            <p class="text-muted small">Register to report campus complaints & track resolution</p>
+            <h3 class="fw-bold mb-1" id="headerRoleTitle">Create Account</h3>
+            <p class="text-muted small" id="headerRoleSub">Select your role to access the CampusFix portal</p>
           </div>
 
           <div id="regAlert" class="alert d-none"></div>
 
           <form id="registerForm">
-            <!-- Fixed Student Role Indicator -->
-            <div class="mb-3 p-2.5 bg-light rounded border d-flex align-items-center justify-content-between">
-              <span class="small text-muted fw-semibold">Account Role</span>
-              <span class="badge bg-primary px-3 py-1.5 fs-7"><i class="bi bi-mortarboard-fill me-1"></i>Student Account</span>
+            <!-- Role Selector -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-muted text-uppercase letter-spacing-1 d-block mb-2">Account Role</label>
+              <div class="btn-group w-100" role="group" aria-label="Account Role Selection">
+                <input type="radio" class="btn-check" name="accountRole" id="roleStudent" value="student" autocomplete="off" checked>
+                <label class="btn btn-outline-primary py-2 fw-semibold d-flex flex-column align-items-center gap-1" for="roleStudent">
+                  <i class="bi bi-mortarboard-fill fs-5"></i>
+                  <span>Student</span>
+                </label>
+
+                <input type="radio" class="btn-check" name="accountRole" id="roleStaff" value="staff" autocomplete="off">
+                <label class="btn btn-outline-info py-2 fw-semibold d-flex flex-column align-items-center gap-1" for="roleStaff">
+                  <i class="bi bi-tools fs-5"></i>
+                  <span>Staff</span>
+                </label>
+
+                <input type="radio" class="btn-check" name="accountRole" id="roleAdmin" value="admin" autocomplete="off">
+                <label class="btn btn-outline-purple py-2 fw-semibold d-flex flex-column align-items-center gap-1" for="roleAdmin">
+                  <i class="bi bi-shield-lock-fill fs-5"></i>
+                  <span>Admin</span>
+                </label>
+              </div>
             </div>
 
+            <!-- Role Description Alert -->
+            <div id="roleHintBanner" class="alert alert-primary py-2 px-3 small mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-info-circle-fill"></i>
+              <span id="roleHintText">Report campus complaints, attach photo evidence & track repairs.</span>
+            </div>
+
+            <!-- Standard Fields -->
             <div class="mb-3">
-              <label for="name" class="form-label fw-semibold small">Full Name</label>
+              <label for="name" class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
               <input type="text" class="form-control bg-light" id="name" placeholder="e.g. Alex Rivers" required>
             </div>
 
             <div class="mb-3">
-              <label for="email" class="form-label fw-semibold small">College Email Address</label>
-              <input type="email" class="form-control bg-light" id="email" placeholder="student@campusfix.edu" required autocomplete="email">
+              <label for="email" class="form-label fw-semibold small" id="lblEmail">Email Address <span class="text-danger">*</span></label>
+              <input type="email" class="form-control bg-light" id="email" placeholder="name@campusfix.edu" required autocomplete="email">
             </div>
 
             <div class="mb-3">
-              <label for="password" class="form-label fw-semibold small">Password</label>
+              <label for="password" class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="password" class="form-control bg-light border-end-0" id="password" placeholder="••••••••" required autocomplete="new-password">
-                <span class="input-group-text bg-light border-start-0 password-toggle" id="toggleRegPasswordBtn">
+                <span class="input-group-text bg-light border-start-0 password-toggle" id="toggleRegPasswordBtn" title="Toggle password visibility">
                   <i class="bi bi-eye text-muted" id="toggleRegPasswordIcon"></i>
                 </span>
               </div>
+            </div>
+
+            <!-- Staff Department Field (Hidden by default) -->
+            <div class="mb-3 d-none" id="departmentFieldGroup">
+              <label for="department" class="form-label fw-semibold small">Assigned Department <span class="text-danger">*</span></label>
+              <select class="form-select bg-light" id="department">
+                <option value="">-- Choose Department --</option>
+                <option value="Electrical">Electrical</option>
+                <option value="IT/Network">IT/Network</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Equipment">Equipment</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="form-text small text-muted">Complaints under this department will appear in your staff queue.</div>
+            </div>
+
+            <!-- Admin Passcode Field (Hidden by default) -->
+            <div class="mb-3 d-none" id="adminSecretFieldGroup">
+              <label for="adminSecretKey" class="form-label fw-semibold small d-flex justify-content-between align-items-center">
+                <span>Admin Passcode / Security Key <span class="text-danger">*</span></span>
+                <span class="badge bg-secondary">Required</span>
+              </label>
+              <div class="input-group">
+                <input type="password" class="form-control bg-light border-end-0" id="adminSecretKey" placeholder="Enter admin security passcode" autocomplete="off">
+                <span class="input-group-text bg-light border-start-0 password-toggle" id="toggleAdminSecretBtn" title="Toggle passcode visibility">
+                  <i class="bi bi-eye text-muted" id="toggleAdminSecretIcon"></i>
+                </span>
+              </div>
+              <div class="form-text small text-muted">Predefined authorization key required to create an Admin account.</div>
             </div>
 
             <div class="mb-4">
@@ -68,12 +123,12 @@
             </div>
 
             <button type="submit" class="btn btn-primary-custom w-100 py-2.5 mb-3 fw-bold" id="btnRegSubmit">
-              Create Student Account
+              <i class="bi bi-person-plus-fill me-2"></i>Create Student Account
             </button>
           </form>
 
           <div class="text-center mt-3 small text-muted">
-            Already registered? <a href="login.html" class="text-primary fw-semibold text-decoration-none">Sign in here</a>
+            Already have an account? <a href="login.html" class="text-primary fw-semibold text-decoration-none">Sign in here</a>
           </div>
         </div>
       </div>
@@ -89,6 +144,7 @@
   <script src="js/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Toggle password visibility
       const toggleBtn = document.getElementById('toggleRegPasswordBtn');
       const passwordInput = document.getElementById('password');
       const toggleIcon = document.getElementById('toggleRegPasswordIcon');
@@ -98,6 +154,103 @@
           const isPassword = passwordInput.getAttribute('type') === 'password';
           passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
           toggleIcon.className = isPassword ? 'bi bi-eye-slash text-primary' : 'bi bi-eye text-muted';
+        });
+      }
+
+      // Toggle admin passcode visibility
+      const toggleSecretBtn = document.getElementById('toggleAdminSecretBtn');
+      const secretInput = document.getElementById('adminSecretKey');
+      const toggleSecretIcon = document.getElementById('toggleAdminSecretIcon');
+
+      if (toggleSecretBtn && secretInput && toggleSecretIcon) {
+        toggleSecretBtn.addEventListener('click', () => {
+          const isPass = secretInput.getAttribute('type') === 'password';
+          secretInput.setAttribute('type', isPass ? 'text' : 'password');
+          toggleSecretIcon.className = isPass ? 'bi bi-eye-slash text-primary' : 'bi bi-eye text-muted';
+        });
+      }
+
+      // Role selection handler
+      const roleRadios = document.querySelectorAll('input[name="accountRole"]');
+      const deptGroup = document.getElementById('departmentFieldGroup');
+      const adminGroup = document.getElementById('adminSecretFieldGroup');
+      const deptSelect = document.getElementById('department');
+      const adminSecretKey = document.getElementById('adminSecretKey');
+      const submitBtn = document.getElementById('btnRegSubmit');
+      const roleHintBanner = document.getElementById('roleHintBanner');
+      const roleHintText = document.getElementById('roleHintText');
+      const iconWrapper = document.getElementById('headerRoleIconWrapper');
+      const icon = document.getElementById('headerRoleIcon');
+
+      function updateRoleUI(role) {
+        if (role === 'staff') {
+          deptGroup.classList.remove('d-none');
+          deptSelect.setAttribute('required', 'required');
+
+          adminGroup.classList.add('d-none');
+          adminSecretKey.removeAttribute('required');
+
+          roleHintBanner.className = 'alert alert-cyan py-2 px-3 small mb-3 d-flex align-items-center gap-2';
+          roleHintText.textContent = 'Technical staff account. Select your department to receive assignments.';
+
+          iconWrapper.className = 'bg-cyan-50 text-cyan-700 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center';
+          icon.className = 'bi bi-tools fs-3 text-info';
+
+          submitBtn.innerHTML = '<i class="bi bi-tools me-2"></i>Create Staff Account';
+        } else if (role === 'admin') {
+          adminGroup.classList.remove('d-none');
+          adminSecretKey.setAttribute('required', 'required');
+
+          deptGroup.classList.add('d-none');
+          deptSelect.removeAttribute('required');
+
+          roleHintBanner.className = 'alert alert-purple py-2 px-3 small mb-3 d-flex align-items-center gap-2';
+          roleHintText.textContent = 'Administrator account. Enter the master security passcode to authorize.';
+
+          iconWrapper.className = 'bg-purple-50 text-purple-700 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center';
+          icon.className = 'bi bi-shield-lock-fill fs-3 text-purple';
+
+          submitBtn.innerHTML = '<i class="bi bi-shield-lock-fill me-2"></i>Create Admin Account';
+        } else {
+          // student
+          deptGroup.classList.add('d-none');
+          deptSelect.removeAttribute('required');
+
+          adminGroup.classList.add('d-none');
+          adminSecretKey.removeAttribute('required');
+
+          roleHintBanner.className = 'alert alert-primary py-2 px-3 small mb-3 d-flex align-items-center gap-2';
+          roleHintText.textContent = 'Report campus complaints, attach photo evidence & track repairs.';
+
+          iconWrapper.className = 'bg-indigo-50 text-indigo-600 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center';
+          icon.className = 'bi bi-mortarboard fs-3 text-primary';
+
+          submitBtn.innerHTML = '<i class="bi bi-mortarboard-fill me-2"></i>Create Student Account';
+        }
+      }
+
+      roleRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          updateRoleUI(e.target.value);
+        });
+      });
+
+      // Optionally fetch real departments from API if available
+      if (window.API && API.request) {
+        API.request('/departments').then(data => {
+          if (data && data.departments && data.departments.length > 0) {
+            const currentVal = deptSelect.value;
+            deptSelect.innerHTML = '<option value="">-- Choose Department --</option>';
+            data.departments.forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d._id;
+              opt.textContent = `${d.name} (${d.code || d.name})`;
+              deptSelect.appendChild(opt);
+            });
+            if (currentVal) deptSelect.value = currentVal;
+          }
+        }).catch(err => {
+          console.log('Using default department list');
         });
       }
     });

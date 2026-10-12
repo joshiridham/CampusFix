@@ -9,26 +9,62 @@ const generateToken = (id) => {
   return jwt.sign({ id }, JWT_SECRET, { expiresIn: '7d' });
 };
 
-// @desc    Register a new student user (Public registration)
+const ADMIN_REGISTRATION_SECRET = process.env.ADMIN_REGISTRATION_SECRET || 'Admin@CampusFix2026';
+
+// @desc    Register a new user (Student, Staff, or Admin)
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, phone } = req.body;
+    const { name, email, password, role, department, adminSecretKey, phone } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide name, email, and password.' });
     }
 
-    // STRICT SECURITY RULE: Reject public registration for non-student roles
-    if (role && (role.toLowerCase() === 'admin' || role.toLowerCase() === 'staff')) {
-      return res.status(400).json({
-        success: false,
-        message: 'Security Policy: Public registration is strictly allowed for Student accounts only. Admin and Staff accounts cannot be registered publicly.'
-      });
+    // Determine normalized role (default: student)
+    const normalizedRole = (role || 'student').toLowerCase().trim();
+    if (!['student', 'staff', 'admin'].includes(normalizedRole)) {
+      return res.status(400).json({ success: false, message: 'Invalid account role specified.' });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    // Verify Admin Secret Passcode for Admin registration
+    if (normalizedRole === 'admin') {
+      if (!adminSecretKey || adminSecretKey.trim() !== ADMIN_REGISTRATION_SECRET) {
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid Admin Security Passcode. Only authorized personnel can create an Admin account.'
+        });
+      }
+    }
+
+    // Verify or resolve Department for Staff registration
+    let departmentId = null;
+    if (normalizedRole === 'staff') {
+      if (department) {
+        // If department is provided as an ObjectId or Department Name
+        const mongoose = require('mongoose');
+        if (mongoose.Types.ObjectId.isValid(department)) {
+          const dept = await Department.findById(department);
+          if (dept) departmentId = dept._id;
+        }
+        if (!departmentId) {
+          const dept = await Department.findOne({
+            name: new RegExp(`^${department.toString().trim()}$`, 'i')
+          });
+          if (dept) departmentId = dept._id;
+        }
+      }
+
+      if (!departmentId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please select a valid Department for Staff registration.'
+        });
+      }
+    }
+
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'An account with this email address already exists.' });
     }
@@ -36,26 +72,28 @@ const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Explicitly set role to 'student' regardless of frontend body
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: 'student',
+      role: normalizedRole,
+      department: normalizedRole === 'staff' ? departmentId : null,
       phone: phone ? phone.trim() : ''
     });
 
+    const populatedUser = await User.findById(user._id).populate('department', 'name description');
     const token = generateToken(user._id);
 
     return res.status(201).json({
       success: true,
       token,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone
+        id: populatedUser._id,
+        name: populatedUser.name,
+        email: populatedUser.email,
+        role: populatedUser.role,
+        department: populatedUser.department,
+        phone: populatedUser.phone
       }
     });
   } catch (error) {

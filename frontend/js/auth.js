@@ -43,7 +43,7 @@ function renderNavbar() {
           <a class="nav-link text-white me-2" href="login.html">Login</a>
         </li>
         <li class="nav-item">
-          <a class="btn btn-sm btn-primary-custom" href="register.html">Register Student</a>
+          <a class="btn btn-sm btn-primary-custom" href="register.html">Register</a>
         </li>
       `;
     }
@@ -108,6 +108,15 @@ function initRegisterForm() {
     const password = document.getElementById('password').value;
     const phone = document.getElementById('phone') ? document.getElementById('phone').value.trim() : '';
 
+    const roleRadio = document.querySelector('input[name="accountRole"]:checked');
+    const role = roleRadio ? roleRadio.value : 'student';
+
+    const departmentEl = document.getElementById('department');
+    const department = (role === 'staff' && departmentEl) ? departmentEl.value : '';
+
+    const adminSecretEl = document.getElementById('adminSecretKey');
+    const adminSecretKey = (role === 'admin' && adminSecretEl) ? adminSecretEl.value : '';
+
     const alertBox = document.getElementById('regAlert');
     const submitBtn = document.getElementById('btnRegSubmit');
 
@@ -116,26 +125,52 @@ function initRegisterForm() {
       return;
     }
 
+    if (role === 'staff' && !department) {
+      showAlert(alertBox, 'Please select a department for technical staff registration.', 'danger');
+      return;
+    }
+
+    if (role === 'admin' && !adminSecretKey) {
+      showAlert(alertBox, 'Please enter the Admin Security Passcode.', 'danger');
+      return;
+    }
+
     try {
       submitBtn.disabled = true;
+      const originalBtnHtml = submitBtn.innerHTML;
       submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account...';
 
       const data = await API.request('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ name, email, password, phone })
+        body: JSON.stringify({ name, email, password, role, department, adminSecretKey, phone })
       });
 
       API.setSession(data.token, data.user);
-      showAlert(alertBox, 'Student account created successfully! Redirecting...', 'success');
+      const roleDisplayName = data.user.role.charAt(0).toUpperCase() + data.user.role.slice(1);
+      showAlert(alertBox, `${roleDisplayName} account created successfully! Redirecting...`, 'success');
 
       setTimeout(() => {
-        window.location.href = 'student-dashboard.html';
+        if (data.user.role === 'admin') {
+          window.location.href = 'admin-dashboard.html';
+        } else if (data.user.role === 'staff') {
+          window.location.href = 'staff-dashboard.html';
+        } else {
+          window.location.href = 'student-dashboard.html';
+        }
       }, 700);
 
     } catch (err) {
       showAlert(alertBox, err.message || 'Registration failed.', 'danger');
       submitBtn.disabled = false;
-      submitBtn.innerHTML = 'Create Student Account';
+      const roleRadioCurrent = document.querySelector('input[name="accountRole"]:checked');
+      const currentRole = roleRadioCurrent ? roleRadioCurrent.value : 'student';
+      if (currentRole === 'admin') {
+        submitBtn.innerHTML = '<i class="bi bi-shield-lock-fill me-2"></i>Create Admin Account';
+      } else if (currentRole === 'staff') {
+        submitBtn.innerHTML = '<i class="bi bi-tools me-2"></i>Create Staff Account';
+      } else {
+        submitBtn.innerHTML = '<i class="bi bi-mortarboard-fill me-2"></i>Create Student Account';
+      }
     }
   });
 }

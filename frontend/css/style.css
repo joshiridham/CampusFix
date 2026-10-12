@@ -203,3 +203,40 @@ footer {
     font-size: 1.6rem;
   }
 }
+
+/* Role Selector & Custom Outline Buttons */
+.btn-outline-purple {
+  color: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.btn-outline-purple:hover,
+.btn-check:checked + .btn-outline-purple {
+  color: #ffffff;
+  background-color: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.btn-check:checked + .btn-outline-primary {
+  color: #ffffff;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-check:checked + .btn-outline-info {
+  color: #ffffff;
+  background-color: #0284c7;
+  border-color: #0284c7;
+}
+
+.alert-purple {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+.alert-cyan {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}

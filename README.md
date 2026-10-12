@@ -102,7 +102,7 @@ c:\ridham\
 
 ---
 
-## 4. Demo Login Credentials
+## 4. Demo Login Credentials & Registration Passcode
 
 You can use these pre-seeded demo accounts to test each role immediately:
 
@@ -113,7 +113,14 @@ You can use these pre-seeded demo accounts to test each role immediately:
 | **Staff (Electrical)** | `staff.elec@campusfix.edu` | `staff123` | View assigned electrical complaints, update progress, upload proof photo |
 | **Staff (IT)** | `staff.it@campusfix.edu` | `staff123` | View assigned IT/Network complaints, update progress, upload proof photo |
 
-*Note: On the `login.html` page, quick-click buttons are provided to auto-fill these credentials instantly.*
+*Note: On the `login.html` page, quick-click buttons are provided to auto-fill these demo credentials instantly.*
+
+### New Account Registration & Admin Passcode:
+- **Student Registration**: Open to anyone without restrictions.
+- **Staff Registration**: Requires selecting an assigned department (Electrical, IT/Network, Plumbing, Maintenance, Equipment, Other).
+- **Admin Registration Security Passcode**: 
+  - Predefined Passcode: `Admin@CampusFix2026`
+  - Required when creating any new Administrator account to prevent unauthorized escalation.
 
 ---
 
@@ -121,6 +128,7 @@ You can use these pre-seeded demo accounts to test each role immediately:
 
 1. **Role-Based Authentication & Authorization**:
    - Distinct permissions for Students, Admins, and Staff.
+   - Multi-role registration with protected admin security passcode verification.
    - JWT tokens stored in Local Storage.
    - Backend auth middleware enforces role permissions on API endpoints.
 2. **Student Complaint Submission**:

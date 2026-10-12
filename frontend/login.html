@@ -60,8 +60,24 @@
             </button>
           </form>
 
+          <!-- Quick Demo Login Buttons -->
+          <div class="mt-3 pt-3 border-top text-center">
+            <span class="small text-muted fw-semibold d-block mb-2">Quick Demo Sign-In</span>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="demoStudentBtn" title="Fill Student Demo">
+                <i class="bi bi-mortarboard-fill me-1"></i>Student
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-info" id="demoStaffBtn" title="Fill Staff Demo">
+                <i class="bi bi-tools me-1"></i>Staff
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-purple" id="demoAdminBtn" title="Fill Admin Demo">
+                <i class="bi bi-shield-lock-fill me-1"></i>Admin
+              </button>
+            </div>
+          </div>
+
           <div class="text-center mt-3 small text-muted">
-            Don't have an account? <a href="register.html" class="text-primary fw-semibold text-decoration-none">Register Student Account</a>
+            Don't have an account? <a href="register.html" class="text-primary fw-semibold text-decoration-none">Create an Account</a>
           </div>
         </div>
       </div>
@@ -76,7 +92,7 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    // Password visibility toggle
+    // Password visibility toggle & Demo credentials
     document.addEventListener('DOMContentLoaded', () => {
       const toggleBtn = document.getElementById('togglePasswordBtn');
       const passwordInput = document.getElementById('password');
@@ -87,6 +103,33 @@
           const isPassword = passwordInput.getAttribute('type') === 'password';
           passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
           toggleIcon.className = isPassword ? 'bi bi-eye-slash text-primary' : 'bi bi-eye text-muted';
+        });
+      }
+
+      // Quick Demo Autofills
+      const emailInput = document.getElementById('email');
+      const demoStudentBtn = document.getElementById('demoStudentBtn');
+      const demoStaffBtn = document.getElementById('demoStaffBtn');
+      const demoAdminBtn = document.getElementById('demoAdminBtn');
+
+      if (demoStudentBtn && emailInput && passwordInput) {
+        demoStudentBtn.addEventListener('click', () => {
+          emailInput.value = 'student@campusfix.edu';
+          passwordInput.value = 'student123';
+        });
+      }
+
+      if (demoStaffBtn && emailInput && passwordInput) {
+        demoStaffBtn.addEventListener('click', () => {
+          emailInput.value = 'staff.elec@campusfix.edu';
+          passwordInput.value = 'staff123';
+        });
+      }
+
+      if (demoAdminBtn && emailInput && passwordInput) {
+        demoAdminBtn.addEventListener('click', () => {
+          emailInput.value = 'admin@campusfix.edu';
+          passwordInput.value = 'admin123';
         });
       }
     });
