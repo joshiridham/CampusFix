@@ -197,8 +197,35 @@ const verifyAndAssignComplaint = async (req, res) => {
 
     if (status) complaint.status = status;
     if (priority) complaint.priority = priority;
-    if (departmentId) complaint.department = departmentId;
-    if (assignedToStaffId) complaint.assignedTo = assignedToStaffId;
+
+    if (departmentId) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(departmentId)) {
+        complaint.department = departmentId;
+      } else {
+        const rawName = departmentId.toString().trim();
+        let foundDept = await Department.findOne({
+          name: new RegExp(`^${rawName}$`, 'i')
+        });
+        if (!foundDept) {
+          const standardNames = ['Electrical', 'IT/Network', 'Plumbing', 'Maintenance', 'Equipment', 'Other'];
+          const matched = standardNames.find(s => s.toLowerCase() === rawName.toLowerCase()) || rawName;
+          foundDept = await Department.findOneAndUpdate(
+            { name: matched },
+            { $setOnInsert: { name: matched, code: matched.slice(0, 4).toUpperCase(), description: `${matched} Department` } },
+            { upsert: true, new: true }
+          );
+        }
+        if (foundDept) complaint.department = foundDept._id;
+      }
+    }
+
+    if (assignedToStaffId) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(assignedToStaffId)) {
+        complaint.assignedTo = assignedToStaffId;
+      }
+    }
 
     const note = remarks || `Admin updated complaint status to '${complaint.status}'`;
     complaint.statusHistory.push({

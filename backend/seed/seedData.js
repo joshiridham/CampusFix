@@ -10,14 +10,7 @@ const Complaint = require('../models/Complaint');
 
 const ensureSeedData = async () => {
   try {
-    const userCount = await User.countDocuments();
-    if (userCount > 0) {
-      return; // Already initialized
-    }
-
-    console.log('[Seed] Database is empty. Auto-seeding default departments, admin, staff, and initial complaints...');
-
-    // 1. Create Departments
+    // 1. Ensure all standard departments always exist in the database
     const deptList = [
       { name: 'Electrical', description: 'Power supply, wiring, lights, fans, power sockets', code: 'ELEC' },
       { name: 'IT/Network', description: 'Campus Wi-Fi, Ethernet, Routers, Lab PCs, Projectors', code: 'IT' },
@@ -27,12 +20,18 @@ const ensureSeedData = async () => {
       { name: 'Other', description: 'General campus issues and unclassified requests', code: 'OTH' }
     ];
 
-    const createdDepts = await Department.insertMany(deptList);
-    console.log(`[Seed] Created ${createdDepts.length} departments.`);
+    for (const d of deptList) {
+      await Department.findOneAndUpdate(
+        { name: d.name },
+        { $setOnInsert: d },
+        { upsert: true, new: true }
+      );
+    }
+    console.log('[Seed] Verified all 6 campus departments exist.');
 
-    const elecDept = createdDepts.find(d => d.name === 'Electrical');
-    const itDept = createdDepts.find(d => d.name === 'IT/Network');
-    const plumbDept = createdDepts.find(d => d.name === 'Plumbing');
+    // Fetch the stored departments
+    const elecDept = await Department.findOne({ name: 'Electrical' });
+    const itDept = await Department.findOne({ name: 'IT/Network' });
 
     // 2. Passwords Hashing
     const salt = await bcrypt.genSalt(10);
@@ -40,8 +39,8 @@ const ensureSeedData = async () => {
     const passAdmin = await bcrypt.hash('admin123', salt);
     const passStaff = await bcrypt.hash('staff123', salt);
 
-    // 3. Create Users
-    const users = [
+    // 3. Ensure Default Users exist
+    const defaultUsers = [
       {
         name: 'Alex Rivers (Student)',
         email: 'student@campusfix.edu',
@@ -61,7 +60,7 @@ const ensureSeedData = async () => {
         email: 'staff.elec@campusfix.edu',
         password: passStaff,
         role: 'staff',
-        department: elecDept._id,
+        department: elecDept ? elecDept._id : null,
         phone: '+1 555-0144'
       },
       {
@@ -69,63 +68,72 @@ const ensureSeedData = async () => {
         email: 'staff.it@campusfix.edu',
         password: passStaff,
         role: 'staff',
-        department: itDept._id,
+        department: itDept ? itDept._id : null,
         phone: '+1 555-0188'
       }
     ];
 
-    const createdUsers = await User.insertMany(users);
-    console.log(`[Seed] Created ${createdUsers.length} initial users.`);
-
-    const studentUser = createdUsers.find(u => u.role === 'student');
-    const adminUser = createdUsers.find(u => u.role === 'admin');
-    const elecStaff = createdUsers.find(u => u.email === 'staff.elec@campusfix.edu');
-    const itStaff = createdUsers.find(u => u.email === 'staff.it@campusfix.edu');
-
-    // 4. Create Sample Complaints
-    const sampleComplaints = [
-      {
-        complaintId: 'CF-2026-001',
-        title: 'Ceiling Fan Making Loud Noise & Sparking',
-        description: 'The ceiling fan in Lecture Hall 3B produces a loud metallic grinding noise and sparked when turned to high speed.',
-        category: 'Electrical',
-        location: 'Building A, 2nd Floor, Room 204 (Lecture Hall 3B)',
-        latitude: 28.6139,
-        longitude: 77.2090,
-        status: 'Assigned',
-        priority: 'High',
-        submittedBy: studentUser._id,
-        assignedTo: elecStaff._id,
-        department: elecDept._id,
-        statusHistory: [
-          { status: 'Pending', remarks: 'Complaint submitted by student', updatedBy: studentUser._id, timestamp: new Date(Date.now() - 86400000 * 2) },
-          { status: 'Assigned', remarks: 'Verified issue. Assigned to John Spark for repair.', updatedBy: adminUser._id, timestamp: new Date(Date.now() - 86400000) }
-        ]
-      },
-      {
-        complaintId: 'CF-2026-002',
-        title: 'Wi-Fi Access Point Offline in Central Library',
-        description: 'No internet connection available on 1st Floor Reading Area. SSID CampusGuest displays authentication timeout error.',
-        category: 'IT/Network',
-        location: 'Central Library, 1st Floor Reading Desk 12',
-        latitude: 28.6145,
-        longitude: 77.2098,
-        status: 'In Progress',
-        priority: 'Urgent',
-        submittedBy: studentUser._id,
-        assignedTo: itStaff._id,
-        department: itDept._id,
-        staffRemarks: 'Inspecting router configuration and replacing broken fiber patch cable.',
-        statusHistory: [
-          { status: 'Pending', remarks: 'Complaint submitted by student', updatedBy: studentUser._id, timestamp: new Date(Date.now() - 86400000 * 3) },
-          { status: 'Assigned', remarks: 'Assigned to Sarah Bytes', updatedBy: adminUser._id, timestamp: new Date(Date.now() - 86400000 * 2) },
-          { status: 'In Progress', remarks: 'Replaced router power unit, testing bandwidth.', updatedBy: itStaff._id, timestamp: new Date(Date.now() - 3600000 * 4) }
-        ]
+    for (const u of defaultUsers) {
+      const exists = await User.findOne({ email: u.email });
+      if (!exists) {
+        await User.create(u);
       }
-    ];
+    }
 
-    await Complaint.insertMany(sampleComplaints);
-    console.log(`[Seed] Created initial complaints successfully.`);
+    // 4. Create Sample Complaints if none exist
+    const complaintCount = await Complaint.countDocuments();
+    if (complaintCount === 0) {
+      const studentUser = await User.findOne({ email: 'student@campusfix.edu' });
+      const adminUser = await User.findOne({ email: 'admin@campusfix.edu' });
+      const elecStaff = await User.findOne({ email: 'staff.elec@campusfix.edu' });
+      const itStaff = await User.findOne({ email: 'staff.it@campusfix.edu' });
+
+      if (studentUser && adminUser && elecStaff && itStaff && elecDept && itDept) {
+        const sampleComplaints = [
+          {
+            complaintId: 'CF-2026-001',
+            title: 'Ceiling Fan Making Loud Noise & Sparking',
+            description: 'The ceiling fan in Lecture Hall 3B produces a loud metallic grinding noise and sparked when turned to high speed.',
+            category: 'Electrical',
+            location: 'Building A, 2nd Floor, Room 204 (Lecture Hall 3B)',
+            latitude: 28.6139,
+            longitude: 77.2090,
+            status: 'Assigned',
+            priority: 'High',
+            submittedBy: studentUser._id,
+            assignedTo: elecStaff._id,
+            department: elecDept._id,
+            statusHistory: [
+              { status: 'Pending', remarks: 'Complaint submitted by student', updatedBy: studentUser._id, timestamp: new Date(Date.now() - 86400000 * 2) },
+              { status: 'Assigned', remarks: 'Verified issue. Assigned to John Spark for repair.', updatedBy: adminUser._id, timestamp: new Date(Date.now() - 86400000) }
+            ]
+          },
+          {
+            complaintId: 'CF-2026-002',
+            title: 'Wi-Fi Access Point Offline in Central Library',
+            description: 'No internet connection available on 1st Floor Reading Area. SSID CampusGuest displays authentication timeout error.',
+            category: 'IT/Network',
+            location: 'Central Library, 1st Floor Reading Desk 12',
+            latitude: 28.6145,
+            longitude: 77.2098,
+            status: 'In Progress',
+            priority: 'Urgent',
+            submittedBy: studentUser._id,
+            assignedTo: itStaff._id,
+            department: itDept._id,
+            staffRemarks: 'Inspecting router configuration and replacing broken fiber patch cable.',
+            statusHistory: [
+              { status: 'Pending', remarks: 'Complaint submitted by student', updatedBy: studentUser._id, timestamp: new Date(Date.now() - 86400000 * 3) },
+              { status: 'Assigned', remarks: 'Assigned to Sarah Bytes', updatedBy: adminUser._id, timestamp: new Date(Date.now() - 86400000 * 2) },
+              { status: 'In Progress', remarks: 'Replaced router power unit, testing bandwidth.', updatedBy: itStaff._id, timestamp: new Date(Date.now() - 3600000 * 4) }
+            ]
+          }
+        ];
+
+        await Complaint.insertMany(sampleComplaints);
+        console.log(`[Seed] Created initial complaints successfully.`);
+      }
+    }
   } catch (err) {
     console.error('[Auto-Seed Error]', err);
   }

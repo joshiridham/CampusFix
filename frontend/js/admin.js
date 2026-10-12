@@ -13,7 +13,7 @@ async function initAdminDashboard() {
   const user = requireAuth(['admin']);
   if (!user) return;
 
-  loadDepartmentsAndStaff();
+  await loadDepartmentsAndStaff();
   loadAdminComplaints();
 
   const searchInput = document.getElementById('adminSearch');
@@ -143,10 +143,32 @@ async function openAdminModal(complaintId) {
     document.getElementById('modalComplaintTitle').textContent = c.title;
     document.getElementById('modalComplaintLocation').textContent = c.location;
 
+    if (!cachedDepartments || cachedDepartments.length === 0) {
+      await loadDepartmentsAndStaff();
+    }
+
+    const fallbackDepts = [
+      { _id: 'Electrical', name: 'Electrical' },
+      { _id: 'IT/Network', name: 'IT/Network' },
+      { _id: 'Plumbing', name: 'Plumbing' },
+      { _id: 'Maintenance', name: 'Maintenance' },
+      { _id: 'Equipment', name: 'Equipment' },
+      { _id: 'Other', name: 'Other' }
+    ];
+
+    const deptsToUse = (cachedDepartments && cachedDepartments.length > 0) ? cachedDepartments : fallbackDepts;
+
     // Populate Department Select
     const deptSelect = document.getElementById('modalDepartmentSelect');
+    const compDeptId = c.department ? (c.department._id || c.department) : '';
+    const compDeptName = (c.department && c.department.name) ? c.department.name : (c.category || '');
+
     deptSelect.innerHTML = '<option value="">-- Select Department --</option>' + 
-      cachedDepartments.map(d => `<option value="${d._id}" ${c.department && c.department._id === d._id ? 'selected' : ''}>${d.name}</option>`).join('');
+      deptsToUse.map(d => {
+        const isSelected = (compDeptId && (d._id == compDeptId || d.name === compDeptId)) || 
+                           (compDeptName && d.name.toLowerCase() === compDeptName.toString().toLowerCase());
+        return `<option value="${d._id}" ${isSelected ? 'selected' : ''}>${d.name}</option>`;
+      }).join('');
 
     // Populate Staff Select
     const staffSelect = document.getElementById('modalStaffSelect');

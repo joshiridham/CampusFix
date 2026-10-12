@@ -41,19 +41,37 @@ const registerUser = async (req, res) => {
     // Verify or resolve Department for Staff registration
     let departmentId = null;
     if (normalizedRole === 'staff') {
-      if (department) {
-        // If department is provided as an ObjectId or Department Name
-        const mongoose = require('mongoose');
-        if (mongoose.Types.ObjectId.isValid(department)) {
-          const dept = await Department.findById(department);
-          if (dept) departmentId = dept._id;
+      if (!department) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please select an assigned Department for Staff registration.'
+        });
+      }
+
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(department)) {
+        const dept = await Department.findById(department);
+        if (dept) departmentId = dept._id;
+      }
+
+      if (!departmentId) {
+        const rawDept = department.toString().trim();
+        let dept = await Department.findOne({
+          name: new RegExp(`^${rawDept}$`, 'i')
+        });
+
+        // Self-healing: if department does not exist in DB yet, auto-create it
+        if (!dept) {
+          const standardNames = ['Electrical', 'IT/Network', 'Plumbing', 'Maintenance', 'Equipment', 'Other'];
+          const matched = standardNames.find(s => s.toLowerCase() === rawDept.toLowerCase()) || rawDept;
+          dept = await Department.findOneAndUpdate(
+            { name: matched },
+            { $setOnInsert: { name: matched, code: matched.slice(0, 4).toUpperCase(), description: `${matched} Department` } },
+            { upsert: true, new: true }
+          );
         }
-        if (!departmentId) {
-          const dept = await Department.findOne({
-            name: new RegExp(`^${department.toString().trim()}$`, 'i')
-          });
-          if (dept) departmentId = dept._id;
-        }
+
+        if (dept) departmentId = dept._id;
       }
 
       if (!departmentId) {
